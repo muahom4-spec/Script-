@@ -1,0 +1,147 @@
+# Script---[[
+Script Roblox: 99 Đêm Trong Rừng - Menu Bật Tắt
+Tác giả: muahom4-spec (GitHub)
+Chức năng:
+1. Kill tự động quái vật
+2. Teleport đến đứa trẻ
+3. Teleport về lửa trại
+
+Menu hỗ trợ bật/tắt, có thể di chuyển vị trí.
+]]
+
+-- Tạo giao diện đơn giản
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "Menu99Nights"
+ScreenGui.ResetOnSpawn = false
+pcall(function() ScreenGui.Parent = game.CoreGui end)
+
+local Frame = Instance.new("Frame")
+Frame.Parent = ScreenGui
+Frame.BackgroundColor3 = Color3.fromRGB(35,35,35)
+Frame.Size = UDim2.new(0, 230, 0, 210)
+Frame.Position = UDim2.new(0.1, 0, 0.2, 0)
+Frame.Active = true
+Frame.Draggable = true
+
+local Title = Instance.new("TextLabel", Frame)
+Title.BackgroundTransparency = 1
+Title.Size = UDim2.new(1,0,0,35)
+Title.Text = "99 ĐÊM TRONG RỪNG MENU"
+Title.Font = Enum.Font.SourceSansBold
+Title.TextColor3 = Color3.new(1,1,1)
+Title.TextSize = 18
+
+local KillBtn = Instance.new("TextButton", Frame)
+KillBtn.Size = UDim2.new(1,-20,0,40)
+KillBtn.Position = UDim2.new(0,10,0,45)
+KillBtn.Text = "1. Kill tự động: OFF"
+KillBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
+KillBtn.TextColor3 = Color3.new(1,1,1)
+KillBtn.Font = Enum.Font.SourceSans
+KillBtn.TextSize = 16
+
+local TpChildBtn = Instance.new("TextButton", Frame)
+TpChildBtn.Size = UDim2.new(1,-20,0,40)
+TpChildBtn.Position = UDim2.new(0,10,0,90)
+TpChildBtn.Text = "2. Tp đến đứa trẻ"
+TpChildBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
+TpChildBtn.TextColor3 = Color3.new(1,1,1)
+TpChildBtn.Font = Enum.Font.SourceSans
+TpChildBtn.TextSize = 16
+
+local TpFireBtn = Instance.new("TextButton", Frame)
+TpFireBtn.Size = UDim2.new(1,-20,0,40)
+TpFireBtn.Position = UDim2.new(0,10,0,135)
+TpFireBtn.Text = "3. Tp về lửa trại"
+TpFireBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
+TpFireBtn.TextColor3 = Color3.new(1,1,1)
+TpFireBtn.Font = Enum.Font.SourceSans
+TpFireBtn.TextSize = 16
+
+local CloseBtn = Instance.new("TextButton", Frame)
+CloseBtn.Size = UDim2.new(1,-20,0,25)
+CloseBtn.Position = UDim2.new(0,10,1,-35)
+CloseBtn.Text = "Đóng Menu"
+CloseBtn.BackgroundColor3 = Color3.fromRGB(120,40,40)
+CloseBtn.TextColor3 = Color3.new(1,1,1)
+CloseBtn.Font = Enum.Font.SourceSans
+CloseBtn.TextSize = 14
+
+-- Biến chức năng
+local player = game.Players.LocalPlayer
+local autoKill = false
+local killCoroutine
+
+-- Kill tự động
+function autoKillFunc()
+    while autoKill do
+        -- Tìm enemy/quái vật (sửa tên nếu cần)
+        for _,v in pairs(workspace:GetDescendants()) do
+            if v:IsA("Model") and v:FindFirstChild("Humanoid") and v ~= player.Character and (v.Name:lower():find("enemy") or v.Name:lower():find("monster") or v.Name:lower():find("quái")) and v:FindFirstChild("HumanoidRootPart") then
+                -- Teleport tới quái và "kill"
+                pcall(function()
+                    player.Character.HumanoidRootPart.CFrame = v.HumanoidRootPart.CFrame + Vector3.new(0,2,0)
+                    for i=1,4 do
+                        v.Humanoid.Health = 0
+                        wait(0.1)
+                    end
+                end)
+                wait(0.3)
+            end
+        end
+        wait(0.5)
+    end
+end
+
+KillBtn.MouseButton1Click:Connect(function()
+    autoKill = not autoKill
+    KillBtn.Text = "1. Kill tự động: "..(autoKill and "ON" or "OFF")
+    if autoKill then
+        killCoroutine = coroutine.create(autoKillFunc)
+        coroutine.resume(killCoroutine)
+    end
+end)
+
+-- TP đến đứa trẻ
+TpChildBtn.MouseButton1Click:Connect(function()
+    local found = nil
+    for _,v in pairs(workspace:GetDescendants()) do
+        if v:IsA("Model") and (v.Name:lower():find("child") or v.Name:lower():find("trẻ")) and v:FindFirstChild("HumanoidRootPart") then
+            found = v
+            break
+        end
+    end
+    if found then
+        player.Character.HumanoidRootPart.CFrame = found.HumanoidRootPart.CFrame + Vector3.new(0,2,0)
+    else
+        TpChildBtn.Text = "Không tìm thấy đứa trẻ!"
+        wait(1)
+        TpChildBtn.Text = "2. Tp đến đứa trẻ"
+    end
+end)
+
+-- TP về lửa trại
+TpFireBtn.MouseButton1Click:Connect(function()
+    local found = nil
+    for _,v in pairs(workspace:GetDescendants()) do
+        if (v.Name:lower():find("fire") or v.Name:lower():find("lửa") or v.Name:lower():find("camp")) and v:IsA("BasePart") then
+            found = v
+            break
+        end
+    end
+    if found then
+        player.Character.HumanoidRootPart.CFrame = found.CFrame + Vector3.new(0,3,0)
+    else
+        TpFireBtn.Text = "Không tìm thấy lửa trại!"
+        wait(1)
+        TpFireBtn.Text = "3. Tp về lửa trại"
+    end
+end)
+
+-- Đóng menu
+CloseBtn.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+    autoKill = false
+end)
+
+print("Menu 99 Đêm Trong Rừng đã chạy! Nếu không hoạt động, hãy kiểm tra lại tên NPC/quái/lửa trại trong game.")
